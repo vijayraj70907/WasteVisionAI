@@ -116,13 +116,14 @@ WasteVision_AI/
 ## ⚙️ Installation
 
 ```bash
-git clone https://github.com/debnathsoumili782-ui/WasteVision_AI.git
 
 cd WasteVision_AI
 
 pip install -r requirements.txt
 
+.\venv_clean\Scripts\activate
 python app.py
+
 ```
 
 ---
@@ -141,16 +142,6 @@ Framework:
 Task:
 
 Biomedical Waste Image Classification
-
----
-
-## 👨‍💻 Authors
-
-- Soumili Debnath
-- Sayani Chatterjee
-- Rishita Chakraborty
-- Saswata Sur
-- Subham Biswas
 
 ---
 
