@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Image - WasteVision AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',sans-serif;
+      background:linear-gradient(180deg,#040712 0%,#07101f 60%,#050816 100%);
+      color:#eef4ff;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none}
+    .app{display:flex;gap:20px;padding:20px;min-height:100vh}
+    .sidebar{
+      width:272px;min-width:272px;border-radius:28px;
+      background:linear-gradient(180deg, rgba(9,15,30,0.96), rgba(5,10,22,0.98));
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow:0 24px 70px rgba(0,0,0,0.45);
+      padding:18px 12px 14px;display:flex;flex-direction:column;overflow:hidden;
+    }
+    .brand{display:flex;align-items:center;gap:12px;padding:4px 8px 18px;margin-bottom:10px}
+    .brand-icon{width:44px;height:44px;flex:0 0 44px}
+    .brand-text{font-size:31px;font-weight:800;letter-spacing:-0.05em;line-height:1}
+    .brand-text span{color:#33e05d}
+    .nav{display:flex;flex-direction:column;gap:10px;padding-top:6px}
+    .nav-item{
+      display:flex;align-items:center;gap:16px;height:70px;padding:0 18px;border-radius:18px;
+      color:rgba(245,248,255,0.95);background:transparent;border:0;cursor:pointer;text-align:left;
+      font-size:18px;transition:.2s ease
+    }
+    .nav-item i{width:22px;height:22px;stroke-width:2}
+    .nav-item:hover{background:rgba(255,255,255,0.05)}
+    .nav-item.active{
+      background:linear-gradient(90deg, rgba(35,146,64,0.8), rgba(35,146,64,0.28));
+      box-shadow:inset 0 0 0 1px rgba(128,255,164,0.08)
+    }
+    .sidebar-card{
+      margin-top:auto;margin-top:18px;border-radius:22px;min-height:250px;padding:24px 22px;
+      background:linear-gradient(180deg,#082d1b,#051b11);border:1px solid rgba(58,255,106,0.12);
+      display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden
+    }
+    .sidebar-card::before{
+      content:'';position:absolute;inset:-30px auto auto -40px;width:170px;height:170px;border-radius:50%;
+      background:radial-gradient(circle, rgba(75,255,120,0.15), transparent 65%)
+    }
+    .shield{width:56px;height:56px;margin:0 auto 16px}
+    .sidebar-card h3{text-align:center;margin:0 0 12px;font-size:24px;line-height:1.22;letter-spacing:-0.04em}
+    .sidebar-card p{margin:0;font-size:15px;line-height:1.6;text-align:center;color:rgba(224,245,230,0.76)}
+    .leaf{width:60px;height:60px;margin:14px auto 0;opacity:.95}
+
+    .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
+    .topbar{
+      display:flex;justify-content:flex-end;align-items:center;gap:14px;min-height:58px;padding-right:4px
+    }
+    .icon-btn,.ghost-btn,.solid-btn{
+      height:54px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.03);color:#eef4ff;display:inline-flex;align-items:center;justify-content:center;
+      gap:10px;padding:0 22px;cursor:pointer;transition:.2s ease;box-shadow:0 10px 20px rgba(0,0,0,0.1)
+    }
+    .icon-btn{width:54px;padding:0;border-radius:50%}
+    .ghost-btn:hover,.icon-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.06)}
+    .solid-btn.green{
+      border-color:rgba(66,255,115,0.18);
+      background:linear-gradient(180deg,#54df63,#18b83f);font-weight:700;color:#fff
+    }
+    .solid-btn.blue{
+      border-color:rgba(67,140,255,0.20);
+      background:linear-gradient(180deg,#2f7fff,#1259d7);font-weight:700;color:#fff
+    }
+
+    .page-shell{
+      border-radius:30px; border:1px solid rgba(255,255,255,0.10);
+      box-shadow:0 24px 70px rgba(0,0,0,0.45);
+      background:linear-gradient(135deg, #184f51 0%, #0f6f82 25%, #0b88a0 45%, #1373d7 74%, #1151d2 100%);
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+      min-height:680px;
+    }
+    .page-shell::before{
+      content:'';
+      position:absolute;inset:0;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255,255,255,0.10), transparent 26%),
+        radial-gradient(circle at 35% 84%, rgba(255,255,255,0.05), transparent 18%),
+        linear-gradient(130deg, rgba(255,255,255,0.05), transparent 40%);
+      pointer-events:none
+    }
+
+    .page-head{position:relative;z-index:1;text-align:center;margin-bottom:22px}
+    .page-head h1{font-size:34px;letter-spacing:-0.04em;margin-bottom:8px}
+    .page-head p{color:rgba(240,248,255,0.82)}
+
+    .upload-grid{
+      position:relative;z-index:1;
+      display:grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .panel{
+      border-radius:24px;
+      background:rgba(7,13,24,0.68);
+      border:1px solid rgba(255,255,255,0.09);
+      box-shadow:0 18px 35px rgba(0,0,0,0.18);
+      padding:18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .upload-card{display:flex;flex-direction:column;gap:14px}
+    .upload-drop{
+      border:2px dashed rgba(255,255,255,0.25);
+      border-radius:20px;
+      min-height:250px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:10px;
+      cursor:pointer;
+      text-align:center;
+      padding:18px;
+      background:rgba(255,255,255,0.04);
+    }
+    .upload-drop:hover{background:rgba(255,255,255,0.06)}
+    .upload-drop .big{font-size:18px;font-weight:700}
+    .upload-drop .small{font-size:14px;color:rgba(240,248,255,0.76)}
+    #preview{
+      width:100%;
+      max-height:280px;
+      object-fit:contain;
+      border-radius:18px;
+      background:#000;
+      display:none;
+    }
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      border:none;border-radius:14px;padding:14px 18px;font-weight:700;cursor:pointer
+    }
+    .btn.green{background:#31d85f;color:#fff}
+    .btn.dark{background:rgba(255,255,255,0.08);color:#eef4ff;border:1px solid rgba(255,255,255,0.12)}
+
+    .result-card h2{font-size:24px;margin-bottom:12px}
+    .result-box{
+      border-radius:18px;
+      background:rgba(255,255,255,0.05);
+      padding:18px;
+      margin-top:10px;
+    }
+    .prediction{font-size:22px;font-weight:800;margin-bottom:10px}
+    .confidence{
+      margin-top:10px;
+      width:100%;
+      height:14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.12);
+      overflow:hidden
+    }
+    .confidence-fill{
+      width:0%;
+      height:100%;
+      background:linear-gradient(90deg,#31d85f,#f8c316);
+      border-radius:999px
+    }
+    .confidence-text{margin-top:8px;font-weight:600;color:#d8fce2}
+    .note{
+      margin-top:14px;
+      font-size:13px;
+      color:rgba(255,255,255,0.7);
+      line-height:1.5;
+    }
+
+    .hidden{display:none}
+
+    @media (max-width: 1180px){
+      .app{flex-direction:column}
+      .sidebar{width:100%;min-width:0}
+      .upload-grid{grid-template-columns:1fr}
+      .page-shell{min-height:auto}
+    }
+.brand{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:25px 0 10px;
+    margin-bottom:20px;
+}
+
+.brand-logo{
+    width:250px;
+    height:auto;
+    object-fit:contain;
+    display:block;
+}
+    body::before,
+body::after{
+    content:'';
+    position:fixed;
+    width:450px;
+    height:450px;
+    border-radius:50%;
+    filter:blur(120px);
+    z-index:-1;
+    opacity:.18;
+}
+
+body::before{
+    background:#00c2ff;
+    top:-150px;
+    left:-150px;
+    animation:blobOne 12s ease-in-out infinite alternate;
+}
+
+body::after{
+    background:#33e05d;
+    bottom:-150px;
+    right:-150px;
+    animation:blobTwo 14s ease-in-out infinite alternate;
+}
+
+@keyframes blobOne{
+    from{transform:translate(0,0);}
+    to{transform:translate(120px,80px);}
+}
+
+@keyframes blobTwo{
+    from{transform:translate(0,0);}
+    to{transform:translate(-120px,-80px);}
+}
+    body{
+    position:relative;
+}
+
+body::after{
+    content:'';
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    opacity:.08;
+    background-image:
+      linear-gradient(rgba(255,255,255,.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.15) 1px, transparent 1px);
+    background-size:40px 40px;
+    animation:gridMove 20s linear infinite;
+}
+
+@keyframes gridMove{
+    from{
+        transform:translateY(0);
+    }
+    to{
+        transform:translateY(40px);
+    }
+}
+.user-name{
+    color:#33e05d;
+    font-weight:700;
+    font-size:18px;
+}
+    .logout-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:54px;
+    padding:0 24px;
+    border-radius:16px;
+    border:none;
+    background:linear-gradient(180deg,#54df63,#18b83f);
+    color:#fff;
+    font-weight:700;
+    text-decoration:none;
+    transition:.25s ease;
+    box-shadow:0 10px 20px rgba(0,0,0,.15);
+}
+
+.logout-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 0 22px rgba(51,224,93,.45);
+}
+
+    /* ---- Points pill ---- */
+    .points-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:0 18px;height:54px;border-radius:16px;
+      background:linear-gradient(135deg,rgba(51,224,93,0.14),rgba(24,184,63,0.10));
+      border:1px solid rgba(51,224,93,0.22);
+      font-weight:700;font-size:15px;color:#6effa0;
+      text-decoration:none;transition:.2s ease;
+      box-shadow:0 0 18px rgba(51,224,93,0.08);
+    }
+    .points-pill:hover{
+      background:linear-gradient(135deg,rgba(51,224,93,0.22),rgba(24,184,63,0.18));
+      box-shadow:0 0 26px rgba(51,224,93,0.22);transform:translateY(-1px);
+    }
+
+    /* ---- Hazard alert banner ---- */
+    .hazard-banner{
+      display:none;
+      position:relative;z-index:10;
+      margin-top:18px;
+      border-radius:18px;
+      padding:18px 22px;
+      background:linear-gradient(135deg,rgba(180,0,0,0.28),rgba(220,30,30,0.18));
+      border:2px solid rgba(255,60,60,0.70);
+      box-shadow:0 0 32px rgba(255,0,0,0.25),inset 0 0 20px rgba(255,0,0,0.08);
+      animation:hazardPulse 1.4s ease-in-out infinite;
+      color:#fff;
+    }
+    @keyframes hazardPulse{
+      0%,100%{box-shadow:0 0 18px rgba(255,0,0,0.20),inset 0 0 12px rgba(255,0,0,0.06);}
+      50%{box-shadow:0 0 46px rgba(255,60,60,0.55),inset 0 0 28px rgba(255,0,0,0.16);}
+    }
+    .hazard-banner.visible{display:flex;align-items:flex-start;gap:16px;}
+    .hazard-icon{font-size:34px;line-height:1;flex-shrink:0;}
+    .hazard-title{font-size:19px;font-weight:800;color:#ff5555;margin-bottom:4px;letter-spacing:-0.02em;}
+    .hazard-msg{font-size:14px;color:rgba(255,220,220,0.90);line-height:1.5;}
+
+    /* pulsing red border on result card when hazard detected */
+    .result-card.hazard{
+      outline:3px solid #ff3333;
+      outline-offset:2px;
+      animation:cardPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes cardPulse{
+      0%,100%{outline-color:rgba(255,51,51,0.50);}
+      50%{outline-color:rgba(255,51,51,1);}
+    }
+
+    /* points awarded toast */
+    .pts-toast{
+      position:fixed;bottom:30px;right:30px;z-index:9999;
+      padding:14px 22px;border-radius:16px;
+      background:linear-gradient(135deg,#082d1b,#051b11);
+      border:1px solid rgba(51,224,93,0.30);
+      color:#6effa0;font-weight:700;font-size:15px;
+      box-shadow:0 8px 28px rgba(0,0,0,0.40);
+      opacity:0;transform:translateY(16px);
+      transition:opacity .35s ease,transform .35s ease;
+      pointer-events:none;
+    }
+    .pts-toast.show{opacity:1;transform:translateY(0);}
+
+    /* ---- Disposal tip card ---- */
+    .tip-card{
+      display:none;
+      margin-top:14px;
+      border-radius:16px;
+      background:linear-gradient(135deg,rgba(30,80,50,0.55),rgba(15,50,35,0.65));
+      border:1px solid rgba(51,224,93,0.22);
+      padding:16px 18px;
+      gap:12px;
+      animation:tipFadeIn .4s ease both;
+    }
+    @keyframes tipFadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .tip-card.visible{display:flex;align-items:flex-start;}
+    .tip-icon{font-size:26px;line-height:1;flex-shrink:0;margin-top:2px;}
+    .tip-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(110,255,160,0.65);margin-bottom:5px;}
+    .tip-text{font-size:14px;color:rgba(220,245,230,0.90);line-height:1.6;}
+    .tip-loading{font-size:13px;color:rgba(220,245,230,0.50);font-style:italic;}
+
+    /* voice toggle button */
+    .voice-btn{
+      display:inline-flex;align-items:center;gap:7px;
+      margin-top:10px;padding:8px 16px;border-radius:12px;border:none;
+      background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);
+      color:rgba(240,248,255,0.80);font-size:13px;font-weight:600;cursor:pointer;
+      transition:.2s ease;
+    }
+    .voice-btn:hover{background:rgba(255,255,255,0.10);color:#eef4ff;}
+    .voice-btn.speaking{border-color:rgba(51,224,93,0.40);color:#6effa0;background:rgba(51,224,93,0.08);}
+
+    /* ---- Model version badge ---- */
+    .model-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:11px;font-weight:600;
+      padding:4px 11px;border-radius:999px;
+      background:rgba(47,127,255,0.12);border:1px solid rgba(47,127,255,0.22);
+      color:#7fc0ff;margin-top:10px;
+    }
+
+    /* ---- Unknown / low-confidence state ---- */
+    .prediction.unknown{color:#f8c316;}
+    .confidence-fill.unknown{background:linear-gradient(90deg,#f8c316,#ff8f00);}
+    .unknown-note{
+      display:none;margin-top:8px;padding:10px 14px;border-radius:12px;
+      background:rgba(248,195,22,0.10);border:1px solid rgba(248,195,22,0.25);
+      font-size:13px;color:rgba(255,230,100,0.88);line-height:1.5;
+    }
+    .unknown-note.visible{display:block;}
+
+    /* ---- Batch results grid ---- */
+    .batch-section{
+      position:relative;z-index:1;
+      margin-top:20px;
+    }
+    .batch-title{
+      font-size:17px;font-weight:700;margin-bottom:14px;
+      color:rgba(240,248,255,0.90);letter-spacing:-0.02em;
+    }
+    .batch-title span{color:#33e05d;}
+    .batch-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+      gap:14px;
+    }
+    .batch-card{
+      border-radius:18px;
+      background:rgba(7,13,24,0.70);
+      border:1px solid rgba(255,255,255,0.09);
+      padding:14px;
+      display:flex;flex-direction:column;gap:8px;
+      animation:batchIn .35s ease both;
+    }
+    @keyframes batchIn{from{opacity:0;transform:scale(0.96);}to{opacity:1;transform:scale(1);}}
+    .batch-card img{width:100%;height:140px;object-fit:cover;border-radius:12px;background:#000;}
+    .batch-card .b-name{font-size:12px;color:rgba(240,248,255,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .batch-card .b-pred{font-size:15px;font-weight:800;line-height:1.2;}
+    .batch-card .b-pred.unknown{color:#f8c316;}
+    .batch-card .b-pred.hazard{color:#ff5f5f;}
+    .batch-card .b-conf{font-size:12px;color:rgba(240,248,255,0.55);}
+    .batch-card .b-bar{height:6px;border-radius:999px;background:rgba(255,255,255,0.10);overflow:hidden;margin-top:2px;}
+    .batch-card .b-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#31d85f,#f8c316);}
+    .batch-card .b-bar-fill.unknown{background:linear-gradient(90deg,#f8c316,#ff8f00);}
+    .batch-card .b-bar-fill.hazard{background:linear-gradient(90deg,#ff5f5f,#ff3333);}
+    .batch-card.hazard-card{border-color:rgba(255,60,60,0.45);}
+    .batch-progress{font-size:13px;color:rgba(240,248,255,0.55);margin-bottom:10px;}
+
+    /* ---- Export PDF row ---- */
+    .export-row{
+      display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+      margin-top:18px;padding-top:16px;
+      border-top:1px solid rgba(255,255,255,0.08);
+    }
+    .export-row label{font-size:13px;color:rgba(240,248,255,0.55);}
+    .export-row input[type=date]{
+      height:40px;padding:0 12px;border-radius:10px;
+      background:rgba(7,13,24,0.70);border:1px solid rgba(255,255,255,0.12);
+      color:#eef4ff;font-size:13px;
+    }
+    .export-btn{
+      height:40px;padding:0 18px;border-radius:10px;border:none;
+      background:linear-gradient(180deg,#2f7fff,#1259d7);
+      color:#fff;font-weight:700;font-size:13px;cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;transition:.2s ease;
+    }
+    .export-btn:hover{transform:translateY(-1px);box-shadow:0 0 18px rgba(47,127,255,.35);}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='images/logo.png') }}"
+             alt="WasteVision AI"
+             class="brand-logo">
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" href="{{ url_for('index') }}"><i data-lucide="home"></i><span>Home</span></a>
+        <a class="nav-item" href="{{ url_for('live_detection') }}"><i data-lucide="video"></i><span>Live Detection</span></a>
+        <a class="nav-item active" href="{{ url_for('upload_image') }}"><i data-lucide="upload"></i><span>Upload Image</span></a>
+        <a class="nav-item" href="{{ url_for('detection_history') }}"><i data-lucide="history"></i><span>Detection History</span></a>
+        <a class="nav-item" href="{{ url_for('dashboard') }}"><i data-lucide="bar-chart-2"></i><span>My Dashboard</span></a>
+        <a class="nav-item" href="{{ url_for('leaderboard') }}"><i data-lucide="trophy"></i><span>Leaderboard</span></a>
+        <a class="nav-item" href="{{ url_for('disposal_finder') }}"><i data-lucide="map-pin"></i><span>Find Disposal Site</span></a>
+        <a class="nav-item" href="{{ url_for('waste_guide') }}"><i data-lucide="book-open"></i><span>Waste Guide</span></a>
+        <a class="nav-item" href="{{ url_for('about') }}"><i data-lucide="info"></i><span>About</span></a>
+        <a class="nav-item" href="{{ url_for('contact') }}"><i data-lucide="mail"></i><span>Contact</span></a>
+      </nav>
+
+      <div class="sidebar-card">
+        <svg class="shield" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M32 6L52 13V28C52 42 43 52.3 32 56C21 52.3 12 42 12 28V13L32 6Z" stroke="#33e05d" stroke-width="3.5"/>
+          <path d="M22 33C26 24 34 20 42 19C39 29 34 39 26 46C22 42 19.5 37.8 18 33.8C17.7 33.1 17.8 32.9 18.5 32.7C19.6 32.4 20.8 32.7 22 33Z" fill="#33e05d"/>
+        </svg>
+        <div>
+          <h3>Keep Our Environment Safe</h3>
+          <p>Proper segregation of biowaste ensures a healthier tomorrow.</p>
+        </div>
+        <svg class="leaf" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M50 14C34 15 21 27 18 46C36 48 49 36 50 14Z" fill="#33e05d"/>
+          <path d="M20 44C28 37 35 32 45 26" stroke="#07101f" stroke-width="3" stroke-linecap="round"/>
+          <path d="M16 44C21 37 25 30 26 21" stroke="#33e05d" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <button class="icon-btn" id="themeBtn">
+           <i data-lucide="sun-medium"></i>
+        </button>
+          {% if session.get('username') %}
+          <a href="{{ url_for('leaderboard') }}" class="points-pill" title="View Leaderboard" id="pointsPill">
+            <i data-lucide="zap" style="width:16px;height:16px;flex-shrink:0;"></i>
+            <span id="topbarPts">{{ session.get('eco_points', 0) }}</span> pts &nbsp;·&nbsp; <span id="topbarBadge">{{ session.get('badge', 'Newcomer') }}</span>
+          </a>
+          <span style="color:#33e05d;font-weight:700;margin-right:4px;">Hi, {{ session['username'] }}</span>
+          <a href="{{ url_for('logout') }}" class="logout-btn">
+            <i data-lucide="log-out"></i>
+            Logout
+          </a>
+          {% else %}
+          <a href="{{ url_for('login_signup') }}" class="login-btn">Login</a>
+          <a href="{{ url_for('login_signup') }}" class="signup-btn">Sign Up</a>
+          {% endif %}
+      </div>
+
+      <section class="page-shell">
+        <div class="page-head">
+          <h1>Upload Image</h1>
+          <p>Choose one or multiple images — each is analysed instantly.</p>
+        </div>
+
+        <div class="upload-grid">
+          <div class="panel upload-card">
+            <label class="upload-drop" for="fileInput">
+              <div class="big">Choose image(s)</div>
+              <div class="small">Click to browse · supports multiple files</div>
+            </label>
+            <input type="file" id="fileInput" accept="image/*" multiple class="hidden" />
+            <img id="preview" alt="Preview">
+            <div class="actions">
+              <button class="btn green" onclick="predictImage()">Predict</button>
+              <button class="btn dark" onclick="clearFile()">Clear</button>
+            </div>
+            <div class="note">
+              The percentage shown is model confidence. Results below 50% are marked
+              <em>Unknown / Not Sure</em>. Batch mode processes each file in sequence.
+            </div>
+          </div>
+
+          <div class="panel result-card">
+            <h2>Prediction Result</h2>
+            <div class="result-box">
+              <div class="prediction" id="prediction">No prediction yet</div>
+              <div class="confidence">
+                <div class="confidence-fill" id="confidenceFill"></div>
+              </div>
+              <div class="confidence-text" id="confidenceText">Confidence: 0%</div>
+              <div class="unknown-note" id="unknownNote">
+                ⚠️ Confidence below 50% — the model is not sure. Try a clearer image or different angle.
+              </div>
+            </div>
+            <!-- AI Disposal Tip -->
+            <div class="tip-card" id="tipCard">
+              <div class="tip-icon" aria-hidden="true">♻️</div>
+              <div>
+                <div class="tip-label">AI Disposal Tip</div>
+                <div class="tip-text" id="tipText"><span class="tip-loading">Generating tip…</span></div>
+                <button class="voice-btn" id="voiceBtn" onclick="speakResult()" title="Read aloud">
+                  🔊 Read Aloud
+                </button>
+              </div>
+            </div>
+            <div class="note">
+              Powered by MobileNetV2 · <span id="modelVersionBadge" class="model-badge">
+                <i data-lucide="cpu" style="width:12px;height:12px;"></i>
+                Model v1.0 — Medical Waste Specialist
+              </span>
+            </div>
+          </div>
+        </div><!-- /upload-grid -->
+
+        <!-- Hazard alert banner (shown when a syringe class is detected) -->
+        <div class="hazard-banner" id="hazardBanner" role="alert" aria-live="assertive">
+          <div class="hazard-icon" aria-hidden="true">⚠️</div>
+          <div>
+            <div class="hazard-title">HAZARDOUS WASTE DETECTED</div>
+            <div class="hazard-msg">Do <strong>NOT</strong> touch with bare hands! Dispose in a sharps container. Use PPE (gloves + mask) when handling.</div>
+          </div>
+        </div>
+
+        <!-- Batch results grid (visible when >1 file selected) -->
+        <div class="batch-section" id="batchSection" style="display:none;">
+          <div class="batch-title">Batch Results <span id="batchCounter"></span></div>
+          <div class="batch-progress" id="batchProgress"></div>
+          <div class="batch-grid" id="batchGrid"></div>
+        </div>
+
+        <!-- Export PDF row -->
+        <div class="export-row">
+          <label>Export scan history as PDF:</label>
+          <label style="font-size:13px;color:rgba(240,248,255,0.55);">From</label>
+          <input type="date" id="exportFrom">
+          <label style="font-size:13px;color:rgba(240,248,255,0.55);">To</label>
+          <input type="date" id="exportTo">
+          <button class="export-btn" onclick="exportPDF()">
+            <i data-lucide="download" style="width:15px;height:15px;"></i>
+            Download PDF Report
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+        item.classList.add('active');
+      });
+    });
+
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      const dark = document.body.dataset.theme !== 'light';
+      document.body.dataset.theme = dark ? 'light' : 'dark';
+      document.body.style.background = dark ? 'linear-gradient(180deg,#eef4ff 0%,#dfeaf9 100%)' : '';
+    });
+
+    // ── DOM refs ──
+    const fileInput      = document.getElementById('fileInput');
+    const preview        = document.getElementById('preview');
+    const predictionEl   = document.getElementById('prediction');
+    const confidenceFill = document.getElementById('confidenceFill');
+    const confidenceText = document.getElementById('confidenceText');
+    const unknownNote    = document.getElementById('unknownNote');
+    const hazardBanner   = document.getElementById('hazardBanner');
+    const resultCard     = document.querySelector('.result-card');
+    const tipCard        = document.getElementById('tipCard');
+    const tipText        = document.getElementById('tipText');
+    const voiceBtn       = document.getElementById('voiceBtn');
+    const topbarPts      = document.getElementById('topbarPts');
+    const topbarBadge    = document.getElementById('topbarBadge');
+    const batchSection   = document.getElementById('batchSection');
+    const batchGrid      = document.getElementById('batchGrid');
+    const batchCounter   = document.getElementById('batchCounter');
+    const batchProgress  = document.getElementById('batchProgress');
+
+    const HAZARD_CLASSES = ['Unused Syringe', 'Waste Syringe'];
+    let lastPoints = topbarPts ? parseInt(topbarPts.textContent, 10) || 0 : 0;
+    let currentTip = '', currentPrediction = '';
+
+    // ── Web Audio warning tone ──
+    let audioCtx = null;
+    function playWarningTone() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        [880, 660].forEach((freq, i) => {
+          const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.18);
+          gain.gain.setValueAtTime(0.18, audioCtx.currentTime + i * 0.18);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i * 0.18 + 0.16);
+          osc.start(audioCtx.currentTime + i * 0.18);
+          osc.stop(audioCtx.currentTime + i * 0.18 + 0.17);
+        });
+      } catch (e) {}
+    }
+
+    // ── SpeechSynthesis voice announcement ──
+    function speakResult() {
+      if (!('speechSynthesis' in window) || !currentPrediction) return;
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(`${currentPrediction} detected. ${currentTip}`);
+      utt.rate = 0.95; utt.pitch = 1; utt.volume = 1;
+      utt.onstart = () => voiceBtn && voiceBtn.classList.add('speaking');
+      utt.onend = utt.onerror = () => voiceBtn && voiceBtn.classList.remove('speaking');
+      window.speechSynthesis.speak(utt);
+    }
+
+    // ── Points toast ──
+    let toastTimeout = null;
+    function showPointsToast(newPts, badge) {
+      let toast = document.getElementById('ptsToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'ptsToast'; toast.className = 'pts-toast';
+        document.body.appendChild(toast);
+      }
+      const gained = newPts - lastPoints;
+      toast.textContent = gained > 0
+        ? `+${gained} eco pts 🌱  Total: ${newPts} · ${badge}`
+        : `${newPts} pts · ${badge}`;
+      toast.classList.add('show');
+      lastPoints = newPts;
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    // ── Single-result display helper ──
+    function displayResult(data) {
+      const isUnknown = data.is_unknown || false;
+      const isHazard  = !isUnknown && HAZARD_CLASSES.includes(data.prediction);
+
+      currentPrediction = data.prediction;
+      currentTip        = data.disposal_tip || '';
+
+      predictionEl.textContent   = data.prediction;
+      predictionEl.classList.toggle('unknown', isUnknown);
+      confidenceFill.style.width = `${data.confidence}%`;
+      confidenceFill.classList.toggle('unknown', isUnknown);
+      confidenceText.textContent = `Confidence: ${data.confidence}%`;
+      unknownNote.classList.toggle('visible', isUnknown);
+
+      tipCard.classList.add('visible');
+      tipText.textContent = isUnknown
+        ? 'Image confidence is too low. Please try again with a clearer photo.'
+        : (currentTip || 'No tip available.');
+
+      hazardBanner.classList.toggle('visible', isHazard);
+      resultCard.classList.toggle('hazard', isHazard);
+      if (isHazard) playWarningTone();
+
+      if (!isUnknown) speakResult();
+
+      if (data.eco_points !== undefined) {
+        if (topbarPts)   topbarPts.textContent  = data.eco_points;
+        if (topbarBadge) topbarBadge.textContent = data.badge || 'Newcomer';
+        showPointsToast(data.eco_points, data.badge || 'Newcomer');
+      }
+    }
+
+    // ── Batch card builder ──
+    function makeBatchCard(file, data) {
+      const isUnknown = data.is_unknown || false;
+      const isHazard  = !isUnknown && HAZARD_CLASSES.includes(data.prediction);
+      const card = document.createElement('div');
+      card.className = 'batch-card' + (isHazard ? ' hazard-card' : '');
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = file.name;
+      const fillCls = isUnknown ? 'unknown' : (isHazard ? 'hazard' : '');
+      card.innerHTML = `
+        <div class="b-name" title="${file.name}">${file.name}</div>
+        <div class="b-pred ${fillCls}">${data.prediction}</div>
+        <div class="b-conf">Confidence: ${data.confidence}%</div>
+        <div class="b-bar"><div class="b-bar-fill ${fillCls}" style="width:${data.confidence}%"></div></div>
+      `;
+      card.insertBefore(img, card.firstChild);
+      return card;
+    }
+
+    // ── File input preview (first file only) ──
+    fileInput.addEventListener('change', () => {
+      const files = fileInput.files;
+      if (!files.length) return;
+      preview.src = URL.createObjectURL(files[0]);
+      preview.style.display = 'block';
+      // Hide batch section until predict runs
+      batchSection.style.display = 'none';
+      batchGrid.innerHTML = '';
+    });
+
+    function clearFile() {
+      fileInput.value = '';
+      preview.src = ''; preview.style.display = 'none';
+      predictionEl.textContent = 'No prediction yet';
+      predictionEl.classList.remove('unknown');
+      confidenceFill.style.width = '0%';
+      confidenceFill.classList.remove('unknown');
+      confidenceText.textContent = 'Confidence: 0%';
+      unknownNote.classList.remove('visible');
+      hazardBanner.classList.remove('visible');
+      resultCard.classList.remove('hazard');
+      tipCard.classList.remove('visible');
+      tipText.innerHTML = '<span class="tip-loading">Generating tip…</span>';
+      batchSection.style.display = 'none';
+      batchGrid.innerHTML = '';
+      currentTip = ''; currentPrediction = '';
+      window.speechSynthesis && window.speechSynthesis.cancel();
+    }
+
+    // ── Main predict: handles single AND batch ──
+    async function predictImage() {
+      const files = fileInput.files;
+      if (!files.length) { alert('Please choose an image first.'); return; }
+
+      window.speechSynthesis && window.speechSynthesis.cancel();
+      tipCard.classList.add('visible');
+      tipText.innerHTML = '<span class="tip-loading">Generating tip…</span>';
+
+      if (files.length === 1) {
+        // ── Single file ──
+        batchSection.style.display = 'none';
+        const formData = new FormData();
+        formData.append('file', files[0]);
+        try {
+          const res  = await fetch('/predict', { method: 'POST', body: formData });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Prediction failed');
+          displayResult(data);
+        } catch (err) {
+          tipText.textContent = 'Could not load tip.';
+          alert(err.message);
+        }
+      } else {
+        // ── Batch mode ──
+        batchSection.style.display = 'block';
+        batchGrid.innerHTML = '';
+        batchCounter.textContent = `(0 / ${files.length})`;
+        batchProgress.textContent = 'Starting batch…';
+
+        for (let i = 0; i < files.length; i++) {
+          batchProgress.textContent = `Processing ${i + 1} of ${files.length}: ${files[i].name}`;
+          const formData = new FormData();
+          formData.append('file', files[i]);
+          try {
+            const res  = await fetch('/predict', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (res.ok) {
+              batchGrid.appendChild(makeBatchCard(files[i], data));
+              batchCounter.textContent = `(${i + 1} / ${files.length})`;
+              // Mirror last result into the single-result panel
+              if (i === files.length - 1) displayResult(data);
+            }
+          } catch (e) { console.error('Batch item failed:', files[i].name, e); }
+        }
+        batchProgress.textContent = `Done — ${files.length} image(s) processed.`;
+      }
+    }
+
+    // ── Export PDF ──
+    function exportPDF() {
+      const from = document.getElementById('exportFrom').value;
+      const to   = document.getElementById('exportTo').value;
+      const url  = '/export-pdf' + (from && to ? `?from=${from}&to=${to}` : '');
+      window.location.href = url;
+    }
+  </script>
+</body>
+</html>

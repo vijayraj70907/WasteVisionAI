@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Disposal Site - WasteVision AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,#040712 0%,#07101f 60%,#050816 100%);color:#eef4ff;min-height:100vh;overflow-x:hidden;}
+    a{color:inherit;text-decoration:none}
+
+    body::before,body::after{content:'';position:fixed;width:450px;height:450px;border-radius:50%;filter:blur(120px);z-index:-1;opacity:.18;}
+    body::before{background:#00c2ff;top:-150px;left:-150px;animation:blobOne 12s ease-in-out infinite alternate;}
+    body::after{background:#33e05d;bottom:-150px;right:-150px;animation:blobTwo 14s ease-in-out infinite alternate;}
+    @keyframes blobOne{from{transform:translate(0,0);}to{transform:translate(120px,80px);}}
+    @keyframes blobTwo{from{transform:translate(0,0);}to{transform:translate(-120px,-80px);}}
+
+    .app{display:flex;gap:20px;padding:20px;min-height:100vh}
+
+    /* ── Sidebar ── */
+    .sidebar{width:272px;min-width:272px;border-radius:28px;background:linear-gradient(180deg,rgba(9,15,30,0.96),rgba(5,10,22,0.98));border:1px solid rgba(255,255,255,0.06);box-shadow:0 24px 70px rgba(0,0,0,0.45);padding:18px 12px 14px;display:flex;flex-direction:column;overflow:hidden;}
+    .brand{display:flex;justify-content:center;align-items:flex-start;padding:25px 0 10px;margin-bottom:20px;}
+    .brand-logo{width:250px;height:auto;object-fit:contain;display:block;}
+    .nav{display:flex;flex-direction:column;gap:10px;padding-top:6px}
+    .nav-item{display:flex;align-items:center;gap:16px;height:70px;padding:0 18px;border-radius:18px;color:rgba(245,248,255,0.95);background:transparent;border:0;cursor:pointer;text-align:left;font-size:18px;transition:.2s ease;}
+    .nav-item i{width:22px;height:22px;stroke-width:2}
+    .nav-item:hover{background:rgba(255,255,255,0.05)}
+    .nav-item.active{background:linear-gradient(90deg,rgba(35,146,64,0.8),rgba(35,146,64,0.28));box-shadow:inset 0 0 0 1px rgba(128,255,164,0.08)}
+    .sidebar-card{margin-top:auto;border-radius:22px;min-height:180px;padding:22px 20px;background:linear-gradient(180deg,#082d1b,#051b11);border:1px solid rgba(58,255,106,0.12);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+    .sidebar-card::before{content:'';position:absolute;inset:-30px auto auto -40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(75,255,120,0.15),transparent 65%)}
+    .sidebar-card h3{text-align:center;margin:0 0 10px;font-size:20px;line-height:1.22;letter-spacing:-0.04em;}
+    .sidebar-card p{margin:0;font-size:13px;line-height:1.6;text-align:center;color:rgba(224,245,230,0.76)}
+
+    /* ── Main ── */
+    .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
+    .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;min-height:58px;padding-right:4px}
+    .icon-btn{width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.03);color:#eef4ff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s ease;}
+    .icon-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.06)}
+    .logout-btn{display:inline-flex;align-items:center;justify-content:center;height:54px;padding:0 24px;border-radius:16px;border:none;background:linear-gradient(180deg,#54df63,#18b83f);color:#fff;font-weight:700;text-decoration:none;transition:.25s ease;gap:8px;}
+    .logout-btn:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(51,224,93,.45);}
+    .login-btn{height:54px;padding:0 22px;border-radius:16px;border:none;background:linear-gradient(180deg,#54df63,#18b83f);color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:.25s ease;}
+    .points-pill{display:inline-flex;align-items:center;gap:8px;padding:0 18px;height:54px;border-radius:16px;background:linear-gradient(135deg,rgba(51,224,93,0.14),rgba(24,184,63,0.10));border:1px solid rgba(51,224,93,0.22);font-weight:700;font-size:15px;color:#6effa0;text-decoration:none;transition:.2s ease;}
+
+    /* ── Page shell ── */
+    .page-shell{border-radius:30px;border:1px solid rgba(255,255,255,0.10);box-shadow:0 24px 70px rgba(0,0,0,0.45);background:linear-gradient(135deg,#184f51 0%,#0f6f82 25%,#0b88a0 45%,#1373d7 74%,#1151d2 100%);padding:28px;position:relative;overflow:hidden;}
+    .page-shell::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 15% 15%,rgba(255,255,255,0.10),transparent 26%),radial-gradient(circle at 80% 80%,rgba(255,255,255,0.05),transparent 18%);pointer-events:none;}
+    .page-head{position:relative;z-index:1;text-align:center;margin-bottom:22px}
+    .page-head h1{font-size:32px;letter-spacing:-0.04em;margin-bottom:8px}
+    .page-head p{color:rgba(240,248,255,0.82)}
+
+    /* ── Controls row ── */
+    .controls{position:relative;z-index:1;display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+    .waste-select{
+      height:52px;padding:0 18px;border-radius:14px;
+      background:rgba(7,13,24,0.75);border:1px solid rgba(255,255,255,0.12);
+      color:#eef4ff;font-size:15px;font-weight:600;cursor:pointer;
+      appearance:none;-webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 12px center;
+      padding-right:40px;min-width:220px;
+    }
+    .waste-select:focus{outline:none;border-color:rgba(51,224,93,0.40);}
+    .locate-btn{
+      height:52px;padding:0 22px;border-radius:14px;border:none;
+      background:linear-gradient(180deg,#54df63,#18b83f);
+      color:#fff;font-weight:700;font-size:15px;cursor:pointer;
+      display:inline-flex;align-items:center;gap:10px;transition:.2s ease;
+    }
+    .locate-btn:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(51,224,93,.45);}
+    .locate-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+
+    .status-msg{font-size:14px;color:rgba(240,248,255,0.65);font-style:italic;}
+
+    /* ── Map + results grid ── */
+    .finder-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 360px;gap:18px;min-height:480px;}
+    #map{border-radius:22px;background:rgba(7,13,24,0.70);border:1px solid rgba(255,255,255,0.09);overflow:hidden;min-height:480px;}
+    .map-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:rgba(240,248,255,0.35);font-size:15px;padding:20px;text-align:center;}
+    .map-placeholder svg{opacity:.25}
+
+    .results-panel{display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:480px;padding-right:4px;}
+    .results-panel::-webkit-scrollbar{width:4px;}
+    .results-panel::-webkit-scrollbar-thumb{background:rgba(51,224,93,0.25);border-radius:4px;}
+
+    .result-item{
+      border-radius:18px;background:rgba(7,13,24,0.70);
+      border:1px solid rgba(255,255,255,0.09);padding:16px 18px;
+      display:flex;flex-direction:column;gap:6px;
+      transition:.2s ease;cursor:pointer;
+    }
+    .result-item:hover{background:rgba(7,13,24,0.90);border-color:rgba(51,224,93,0.25);transform:translateX(-3px);}
+    .result-name{font-size:15px;font-weight:700;line-height:1.3;}
+    .result-addr{font-size:12px;color:rgba(240,248,255,0.55);line-height:1.5;}
+    .result-dist{font-size:12px;font-weight:600;color:#6effa0;}
+    .result-type{display:inline-block;font-size:11px;padding:3px 10px;border-radius:999px;background:rgba(51,224,93,0.12);color:#6effa0;font-weight:600;margin-top:2px;}
+    .result-open{display:inline-block;font-size:11px;padding:3px 10px;border-radius:999px;margin-left:6px;font-weight:600;}
+    .result-open.open{background:rgba(51,224,93,0.12);color:#6effa0;}
+    .result-open.closed{background:rgba(255,95,95,0.12);color:#ff8080;}
+
+    .empty-results{text-align:center;padding:40px 16px;color:rgba(240,248,255,0.35);font-size:14px;}
+
+    /* No API key notice */
+    .api-notice{
+      position:relative;z-index:1;
+      border-radius:16px;padding:18px 22px;
+      background:rgba(248,195,22,0.10);border:1px solid rgba(248,195,22,0.28);
+      color:rgba(255,230,120,0.90);font-size:14px;line-height:1.6;margin-bottom:14px;
+    }
+    .api-notice strong{color:#f8c316;}
+    .api-notice code{background:rgba(0,0,0,0.25);padding:2px 7px;border-radius:6px;font-size:13px;}
+
+    @media(max-width:1180px){.app{flex-direction:column}.sidebar{width:100%;min-width:0}.page-shell{min-height:auto}}
+    @media(max-width:860px){.finder-grid{grid-template-columns:1fr}.results-panel{max-height:320px;overflow-y:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="WasteVision AI" class="brand-logo">
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="{{ url_for('index') }}"><i data-lucide="home"></i><span>Home</span></a>
+      <a class="nav-item" href="{{ url_for('live_detection') }}"><i data-lucide="video"></i><span>Live Detection</span></a>
+      <a class="nav-item" href="{{ url_for('upload_image') }}"><i data-lucide="upload"></i><span>Upload Image</span></a>
+      <a class="nav-item" href="{{ url_for('detection_history') }}"><i data-lucide="history"></i><span>Detection History</span></a>
+      <a class="nav-item" href="{{ url_for('dashboard') }}"><i data-lucide="bar-chart-2"></i><span>My Dashboard</span></a>
+      <a class="nav-item" href="{{ url_for('leaderboard') }}"><i data-lucide="trophy"></i><span>Leaderboard</span></a>
+      <a class="nav-item active" href="{{ url_for('disposal_finder') }}"><i data-lucide="map-pin"></i><span>Find Disposal Site</span></a>
+      <a class="nav-item" href="{{ url_for('waste_guide') }}"><i data-lucide="book-open"></i><span>Waste Guide</span></a>
+      <a class="nav-item" href="{{ url_for('about') }}"><i data-lucide="info"></i><span>About</span></a>
+      <a class="nav-item" href="{{ url_for('contact') }}"><i data-lucide="mail"></i><span>Contact</span></a>
+    </nav>
+    <div class="sidebar-card">
+      <svg style="width:46px;height:46px;margin:0 auto 12px" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M32 6L52 13V28C52 42 43 52.3 32 56C21 52.3 12 42 12 28V13L32 6Z" stroke="#33e05d" stroke-width="3.5"/>
+        <path d="M22 33C26 24 34 20 42 19C39 29 34 39 26 46C22 42 19.5 37.8 18 33.8C17.7 33.1 17.8 32.9 18.5 32.7C19.6 32.4 20.8 32.7 22 33Z" fill="#33e05d"/>
+      </svg>
+      <div>
+        <h3>Dispose Safely</h3>
+        <p>Find certified biomedical waste disposal sites near you.</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="icon-btn" id="themeBtn" title="Theme"><i data-lucide="sun-medium"></i></button>
+      {% if session.get('username') %}
+        <a href="{{ url_for('leaderboard') }}" class="points-pill" title="View Leaderboard">
+          <i data-lucide="zap" style="width:16px;height:16px;"></i>
+          {{ session.get('eco_points', 0) }} pts &nbsp;·&nbsp; {{ session.get('badge', 'Newcomer') }}
+        </a>
+        <span style="color:#33e05d;font-weight:700;">Hi, {{ session['username'] }}</span>
+        <a href="{{ url_for('logout') }}" class="logout-btn"><i data-lucide="log-out"></i> Logout</a>
+      {% else %}
+        <a href="{{ url_for('login_signup') }}" class="login-btn">Login / Sign Up</a>
+      {% endif %}
+    </div>
+
+    <section class="page-shell">
+      <div class="page-head">
+        <h1>📍 Disposal Location Finder</h1>
+        <p>Select a waste type, then click <strong>Find Nearby Sites</strong> to locate certified disposal facilities near you.</p>
+      </div>
+
+      {% if not gmaps_key %}
+      <div class="api-notice">
+        <strong>⚠️ Google Maps API key not set.</strong>
+        Set the <code>GOOGLE_MAPS_API_KEY</code> environment variable to enable live map search.
+        The search requires a key with <em>Maps JavaScript API</em> and <em>Places API</em> enabled.
+        Until then, a static fallback message is shown.
+      </div>
+      {% endif %}
+
+      <div class="controls">
+        <select class="waste-select" id="wasteType" aria-label="Waste type">
+          <option value="pharmacy">Unused Tablets / Medications → Pharmacy</option>
+          <option value="hospital">Unused Syringe → Hospital / Clinic</option>
+          <option value="hospital" data-type="Waste Syringe">Waste Syringe → Hospital Sharps Bin</option>
+          <option value="pharmacy" data-type="Waste Tablets">Waste Tablets → Medicine Take-Back</option>
+          <option value="recycling_center">General Biomedical Waste → Recycling Centre</option>
+        </select>
+        <button class="locate-btn" id="locateBtn" onclick="findNearby()">
+          <i data-lucide="navigation" style="width:18px;height:18px;"></i>
+          Find Nearby Sites
+        </button>
+        <span class="status-msg" id="statusMsg"></span>
+      </div>
+
+      <div class="finder-grid">
+        <div id="map">
+          <div class="map-placeholder" id="mapPlaceholder">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <p>Your location map will appear here.<br>Click <strong>Find Nearby Sites</strong> to begin.</p>
+          </div>
+        </div>
+
+        <div class="results-panel" id="resultsPanel">
+          <div class="empty-results" id="emptyResults">
+            <p>Nearby disposal sites will appear here after search.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Google Maps JS API (only loaded when key is set) -->
+{% if gmaps_key %}
+<script>
+  // Expose key to inline script
+  const GMAPS_KEY = {{ gmaps_key | tojson }};
+</script>
+<script>
+  /* Load Maps JS API dynamically after page load */
+  function loadMapsScript() {
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&libraries=places&callback=initMap`;
+    s.async = true; s.defer = true;
+    document.head.appendChild(s);
+  }
+  window.addEventListener('load', loadMapsScript);
+</script>
+{% endif %}
+
+<script>
+  lucide.createIcons();
+
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const isLight = document.body.dataset.theme === 'light';
+    document.body.dataset.theme = isLight ? 'dark' : 'light';
+    document.body.style.background = isLight ? '' : 'linear-gradient(180deg,#eef4ff 0%,#dfeaf9 100%)';
+  });
+
+  let mapInstance = null;
+  let markers     = [];
+  let infoWindows = [];
+  let userLat = null, userLng = null;
+
+  // Facility-type mapping per waste class
+  const PLACE_TYPE_MAP = {
+    pharmacy:          { keyword: 'pharmacy medicine disposal',   type: 'pharmacy'  },
+    hospital:          { keyword: 'hospital clinic sharps bin',   type: 'hospital'  },
+    recycling_center:  { keyword: 'biomedical waste recycling',   type: 'establishment' },
+  };
+
+  /* Called by Maps API callback */
+  window.initMap = function() {
+    document.getElementById('mapPlaceholder').style.display = 'none';
+    mapInstance = new google.maps.Map(document.getElementById('map'), {
+      zoom: 13,
+      center: { lat: 22.5726, lng: 88.3639 }, // default: Kolkata
+      mapTypeControl: false,
+      streetViewControl: false,
+      styles: [
+        { elementType:'geometry', stylers:[{color:'#07101f'}] },
+        { elementType:'labels.text.fill', stylers:[{color:'#8ec3b9'}] },
+        { elementType:'labels.text.stroke', stylers:[{color:'#07101f'}] },
+        { featureType:'road', elementType:'geometry', stylers:[{color:'#132030'}] },
+        { featureType:'water', elementType:'geometry', stylers:[{color:'#0a1a2e'}] },
+        { featureType:'poi', elementType:'labels', stylers:[{visibility:'off'}] },
+      ]
+    });
+  };
+
+  function clearMarkers() {
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+    infoWindows.forEach(iw => iw.close());
+    infoWindows = [];
+  }
+
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function renderResults(places) {
+    const panel = document.getElementById('resultsPanel');
+    panel.innerHTML = '';
+    if (!places || places.length === 0) {
+      panel.innerHTML = '<div class="empty-results"><p>No facilities found nearby. Try a different waste type or zoom out.</p></div>';
+      return;
+    }
+    places.forEach((p, i) => {
+      const dist = userLat !== null
+        ? haversineKm(userLat, userLng, p.geometry.location.lat(), p.geometry.location.lng()).toFixed(1) + ' km'
+        : '';
+      const openNow = p.opening_hours
+        ? (p.opening_hours.isOpen() ? '<span class="result-open open">Open Now</span>' : '<span class="result-open closed">Closed</span>')
+        : '';
+      const el = document.createElement('div');
+      el.className = 'result-item';
+      el.innerHTML = `
+        <div class="result-name">${i+1}. ${p.name}</div>
+        <div class="result-addr">${p.vicinity || ''}</div>
+        ${dist ? `<div class="result-dist">📍 ${dist} away</div>` : ''}
+        <div><span class="result-type">${p.types ? p.types[0].replace(/_/g,' ') : 'facility'}</span>${openNow}</div>
+      `;
+      el.addEventListener('click', () => {
+        if (mapInstance) {
+          mapInstance.panTo(p.geometry.location);
+          mapInstance.setZoom(16);
+          if (infoWindows[i]) infoWindows[i].open(mapInstance, markers[i]);
+        }
+      });
+      panel.appendChild(el);
+    });
+  }
+
+  function findNearby() {
+    const btn = document.getElementById('locateBtn');
+    const msg = document.getElementById('statusMsg');
+    btn.disabled = true;
+    msg.textContent = 'Getting your location…';
+
+    if (!navigator.geolocation) {
+      msg.textContent = 'Geolocation is not supported by your browser.';
+      btn.disabled = false;
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        msg.textContent = 'Location found. Searching nearby facilities…';
+
+        {% if gmaps_key %}
+        if (!mapInstance) {
+          msg.textContent = 'Maps API loading, please wait…';
+          btn.disabled = false;
+          return;
+        }
+        const center = new google.maps.LatLng(userLat, userLng);
+        mapInstance.setCenter(center);
+
+        // User marker
+        new google.maps.Marker({
+          position: center, map: mapInstance,
+          icon: { path: google.maps.SymbolPath.CIRCLE, scale: 9, fillColor:'#33e05d', fillOpacity:1, strokeColor:'#fff', strokeWeight:2 },
+          title: 'Your location'
+        });
+
+        const wasteType  = document.getElementById('wasteType').value;
+        const cfg        = PLACE_TYPE_MAP[wasteType] || PLACE_TYPE_MAP['hospital'];
+        const service    = new google.maps.places.PlacesService(mapInstance);
+
+        clearMarkers();
+        service.nearbySearch({
+          location: center,
+          radius:   8000,
+          keyword:  cfg.keyword,
+          type:     cfg.type
+        }, (results, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+            msg.textContent = `Found ${results.length} site(s) nearby.`;
+            results.slice(0, 10).forEach((p, i) => {
+              const marker = new google.maps.Marker({
+                position: p.geometry.location, map: mapInstance,
+                title: p.name,
+                label: { text: String(i+1), color:'#fff', fontWeight:'700', fontSize:'12px' },
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 14, fillColor:'#1373d7', fillOpacity:0.9,
+                  strokeColor:'#fff', strokeWeight:2
+                }
+              });
+              const iw = new google.maps.InfoWindow({
+                content: `<div style="color:#07101f;font-family:Inter,sans-serif;font-size:13px;max-width:220px">
+                  <strong>${p.name}</strong><br>${p.vicinity || ''}
+                  ${p.opening_hours ? (p.opening_hours.isOpen() ? '<br><span style="color:green">Open Now</span>' : '<br><span style="color:red">Closed</span>') : ''}
+                </div>`
+              });
+              marker.addListener('click', () => { infoWindows.forEach(x=>x.close()); iw.open(mapInstance, marker); });
+              markers.push(marker);
+              infoWindows.push(iw);
+            });
+            renderResults(results.slice(0, 10));
+          } else {
+            msg.textContent = 'No results found. Try a different waste type.';
+            renderResults([]);
+          }
+          btn.disabled = false;
+        });
+        {% else %}
+        /* No API key — show fallback list with known biomedical waste authorities */
+        msg.textContent = `Location: ${userLat.toFixed(4)}, ${userLng.toFixed(4)}. Live search requires a Google Maps API key.`;
+        const panel = document.getElementById('resultsPanel');
+        panel.innerHTML = `
+          <div style="padding:16px 18px;border-radius:16px;background:rgba(7,13,24,0.70);border:1px solid rgba(255,255,255,0.09)">
+            <div style="font-weight:700;margin-bottom:8px;font-size:15px;">💡 What to do with your waste:</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;color:rgba(240,248,255,0.75)">
+              <li>🏥 <strong>Syringes:</strong> Take to nearest hospital or clinic sharps disposal bin.</li>
+              <li>💊 <strong>Tablets:</strong> Return to a licensed pharmacy medicine take-back programme.</li>
+              <li>♻️ <strong>Other biomedical:</strong> Contact your local municipal biomedical waste authority.</li>
+              <li>🌐 Search for <em>"biomedical waste disposal near me"</em> on Google Maps for live results.</li>
+            </ul>
+          </div>`;
+        btn.disabled = false;
+        {% endif %}
+      },
+      err => {
+        const msgs = { 1:'Permission denied.', 2:'Location unavailable.', 3:'Request timed out.' };
+        msg.textContent = msgs[err.code] || 'Could not get location.';
+        btn.disabled = false;
+      },
+      { timeout: 12000, maximumAge: 60000 }
+    );
+  }
+</script>
+</body>
+</html>

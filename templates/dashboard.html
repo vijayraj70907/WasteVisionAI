@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Dashboard - WasteVision AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',sans-serif;
+      background:linear-gradient(180deg,#040712 0%,#07101f 60%,#050816 100%);
+      color:#eef4ff;min-height:100vh;overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none}
+
+    body::before,body::after{
+      content:'';position:fixed;width:450px;height:450px;border-radius:50%;
+      filter:blur(120px);z-index:-1;opacity:.18;
+    }
+    body::before{background:#00c2ff;top:-150px;left:-150px;animation:blobOne 12s ease-in-out infinite alternate;}
+    body::after{background:#33e05d;bottom:-150px;right:-150px;animation:blobTwo 14s ease-in-out infinite alternate;}
+    @keyframes blobOne{from{transform:translate(0,0);}to{transform:translate(120px,80px);}}
+    @keyframes blobTwo{from{transform:translate(0,0);}to{transform:translate(-120px,-80px);}}
+
+    .app{display:flex;gap:20px;padding:20px;min-height:100vh}
+
+    /* ── Sidebar ── */
+    .sidebar{
+      width:272px;min-width:272px;border-radius:28px;
+      background:linear-gradient(180deg,rgba(9,15,30,0.96),rgba(5,10,22,0.98));
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow:0 24px 70px rgba(0,0,0,0.45);
+      padding:18px 12px 14px;display:flex;flex-direction:column;overflow:hidden;
+    }
+    .brand{display:flex;justify-content:center;align-items:flex-start;padding:25px 0 10px;margin-bottom:20px;}
+    .brand-logo{width:250px;height:auto;object-fit:contain;display:block;}
+    .nav{display:flex;flex-direction:column;gap:10px;padding-top:6px}
+    .nav-item{
+      display:flex;align-items:center;gap:16px;height:70px;padding:0 18px;border-radius:18px;
+      color:rgba(245,248,255,0.95);background:transparent;border:0;cursor:pointer;
+      text-align:left;font-size:18px;transition:.2s ease;
+    }
+    .nav-item i{width:22px;height:22px;stroke-width:2}
+    .nav-item:hover{background:rgba(255,255,255,0.05)}
+    .nav-item.active{
+      background:linear-gradient(90deg,rgba(35,146,64,0.8),rgba(35,146,64,0.28));
+      box-shadow:inset 0 0 0 1px rgba(128,255,164,0.08)
+    }
+    .sidebar-card{
+      margin-top:auto;border-radius:22px;min-height:180px;padding:22px 20px;
+      background:linear-gradient(180deg,#082d1b,#051b11);border:1px solid rgba(58,255,106,0.12);
+      display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden
+    }
+    .sidebar-card::before{
+      content:'';position:absolute;inset:-30px auto auto -40px;width:170px;height:170px;border-radius:50%;
+      background:radial-gradient(circle,rgba(75,255,120,0.15),transparent 65%)
+    }
+    .sidebar-card h3{text-align:center;margin:0 0 10px;font-size:20px;line-height:1.22;letter-spacing:-0.04em;}
+    .sidebar-card p{margin:0;font-size:13px;line-height:1.6;text-align:center;color:rgba(224,245,230,0.76)}
+
+    /* ── Main ── */
+    .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
+    .topbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;min-height:58px;padding-right:4px}
+    .icon-btn{
+      width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.03);color:#eef4ff;display:inline-flex;
+      align-items:center;justify-content:center;cursor:pointer;transition:.2s ease;
+    }
+    .icon-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.06)}
+    .logout-btn{
+      display:inline-flex;align-items:center;justify-content:center;height:54px;padding:0 24px;
+      border-radius:16px;border:none;background:linear-gradient(180deg,#54df63,#18b83f);
+      color:#fff;font-weight:700;text-decoration:none;transition:.25s ease;
+      box-shadow:0 10px 20px rgba(0,0,0,.15);gap:8px;
+    }
+    .logout-btn:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(51,224,93,.45);}
+    .login-btn{
+      height:54px;padding:0 22px;border-radius:16px;border:none;
+      background:linear-gradient(180deg,#54df63,#18b83f);color:#fff;font-weight:700;
+      display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+      transition:.25s ease;
+    }
+    .points-pill{
+      display:inline-flex;align-items:center;gap:8px;padding:0 18px;height:54px;
+      border-radius:16px;background:linear-gradient(135deg,rgba(51,224,93,0.14),rgba(24,184,63,0.10));
+      border:1px solid rgba(51,224,93,0.22);font-weight:700;font-size:15px;color:#6effa0;
+      text-decoration:none;transition:.2s ease;
+    }
+    .points-pill:hover{background:linear-gradient(135deg,rgba(51,224,93,0.22),rgba(24,184,63,0.18));transform:translateY(-1px);}
+
+    /* ── Page shell ── */
+    .page-shell{
+      border-radius:30px;border:1px solid rgba(255,255,255,0.10);
+      box-shadow:0 24px 70px rgba(0,0,0,0.45);
+      background:linear-gradient(135deg,#184f51 0%,#0f6f82 25%,#0b88a0 45%,#1373d7 74%,#1151d2 100%);
+      padding:28px;position:relative;overflow:hidden;
+    }
+    .page-shell::before{
+      content:'';position:absolute;inset:0;
+      background:
+        radial-gradient(circle at 15% 15%,rgba(255,255,255,0.10),transparent 26%),
+        radial-gradient(circle at 80% 80%,rgba(255,255,255,0.05),transparent 18%),
+        linear-gradient(130deg,rgba(255,255,255,0.05),transparent 40%);
+      pointer-events:none;
+    }
+
+    .page-head{position:relative;z-index:1;text-align:center;margin-bottom:28px}
+    .page-head h1{font-size:34px;letter-spacing:-0.04em;margin-bottom:8px}
+    .page-head p{color:rgba(240,248,255,0.82)}
+
+    /* ── Stat cards row ── */
+    .stats-row{
+      position:relative;z-index:1;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      margin-bottom:24px;
+    }
+    .stat-card{
+      border-radius:22px;
+      background:rgba(7,13,24,0.65);
+      border:1px solid rgba(255,255,255,0.09);
+      box-shadow:0 10px 30px rgba(0,0,0,0.18);
+      backdrop-filter:blur(12px);
+      padding:20px 22px;
+      display:flex;flex-direction:column;gap:8px;
+      animation:slideUp .4s ease both;
+    }
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+    .stat-card:nth-child(1){animation-delay:.05s}
+    .stat-card:nth-child(2){animation-delay:.10s}
+    .stat-card:nth-child(3){animation-delay:.15s}
+    .stat-card:nth-child(4){animation-delay:.20s}
+    .stat-label{font-size:13px;font-weight:600;color:rgba(240,248,255,0.55);text-transform:uppercase;letter-spacing:.06em;}
+    .stat-value{font-size:32px;font-weight:800;letter-spacing:-0.04em;line-height:1;}
+    .stat-value.green{color:#33e05d;text-shadow:0 0 18px rgba(51,224,93,0.30);}
+    .stat-value.blue{color:#4ab4ff;text-shadow:0 0 18px rgba(74,180,255,0.25);}
+    .stat-value.yellow{color:#f8c316;text-shadow:0 0 18px rgba(248,195,22,0.25);}
+    .stat-value.teal{color:#2dd4bf;text-shadow:0 0 18px rgba(45,212,191,0.25);}
+    .stat-sub{font-size:13px;color:rgba(240,248,255,0.50);}
+
+    /* ── Chart grid ── */
+    .chart-grid{
+      position:relative;z-index:1;
+      display:grid;
+      grid-template-columns:1fr 1.6fr;
+      gap:18px;
+    }
+    .chart-panel{
+      border-radius:24px;
+      background:rgba(7,13,24,0.65);
+      border:1px solid rgba(255,255,255,0.09);
+      box-shadow:0 14px 32px rgba(0,0,0,0.20);
+      backdrop-filter:blur(12px);
+      padding:22px;
+      animation:slideUp .5s ease both;
+    }
+    .chart-panel:nth-child(1){animation-delay:.25s}
+    .chart-panel:nth-child(2){animation-delay:.30s}
+    .chart-panel h3{
+      font-size:17px;font-weight:700;margin-bottom:18px;
+      color:rgba(240,248,255,0.90);letter-spacing:-0.02em;
+    }
+    .chart-panel h3 span{color:#33e05d;}
+    .chart-wrap{position:relative;width:100%;}
+    .pie-wrap{max-width:280px;margin:0 auto;}
+    .loading-state{
+      text-align:center;padding:48px 20px;
+      color:rgba(240,248,255,0.40);font-size:15px;
+    }
+    .spinner{
+      width:36px;height:36px;border:3px solid rgba(255,255,255,0.12);
+      border-top-color:#33e05d;border-radius:50%;
+      animation:spin .8s linear infinite;margin:0 auto 14px;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── Carbon badge ── */
+    .carbon-badge{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:10px 18px;border-radius:14px;
+      background:rgba(45,212,191,0.10);border:1px solid rgba(45,212,191,0.22);
+      color:#2dd4bf;font-weight:700;font-size:14px;margin-top:4px;
+    }
+
+    /* ── No-data state ── */
+    .no-data{
+      text-align:center;padding:40px 20px;
+      color:rgba(240,248,255,0.45);font-size:15px;
+    }
+
+    @media(max-width:1180px){
+      .app{flex-direction:column}
+      .sidebar{width:100%;min-width:0}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .chart-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:520px){
+      .stats-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="WasteVision AI" class="brand-logo">
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="{{ url_for('index') }}"><i data-lucide="home"></i><span>Home</span></a>
+      <a class="nav-item" href="{{ url_for('live_detection') }}"><i data-lucide="video"></i><span>Live Detection</span></a>
+      <a class="nav-item" href="{{ url_for('upload_image') }}"><i data-lucide="upload"></i><span>Upload Image</span></a>
+      <a class="nav-item" href="{{ url_for('detection_history') }}"><i data-lucide="history"></i><span>Detection History</span></a>
+      <a class="nav-item active" href="{{ url_for('dashboard') }}"><i data-lucide="bar-chart-2"></i><span>My Dashboard</span></a>
+      <a class="nav-item" href="{{ url_for('leaderboard') }}"><i data-lucide="trophy"></i><span>Leaderboard</span></a>
+      <a class="nav-item" href="{{ url_for('disposal_finder') }}"><i data-lucide="map-pin"></i><span>Find Disposal Site</span></a>
+      <a class="nav-item" href="{{ url_for('waste_guide') }}"><i data-lucide="book-open"></i><span>Waste Guide</span></a>
+      <a class="nav-item" href="{{ url_for('about') }}"><i data-lucide="info"></i><span>About</span></a>
+      <a class="nav-item" href="{{ url_for('contact') }}"><i data-lucide="mail"></i><span>Contact</span></a>
+    </nav>
+    <div class="sidebar-card">
+      <svg style="width:46px;height:46px;margin:0 auto 12px" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M32 6L52 13V28C52 42 43 52.3 32 56C21 52.3 12 42 12 28V13L32 6Z" stroke="#33e05d" stroke-width="3.5"/>
+        <path d="M22 33C26 24 34 20 42 19C39 29 34 39 26 46C22 42 19.5 37.8 18 33.8C17.7 33.1 17.8 32.9 18.5 32.7C19.6 32.4 20.8 32.7 22 33Z" fill="#33e05d"/>
+      </svg>
+      <div>
+        <h3>Your Eco Impact</h3>
+        <p>Every scan helps ensure safer waste disposal and a healthier planet.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="topbar">
+      <button class="icon-btn" id="themeBtn" title="Theme"><i data-lucide="sun-medium"></i></button>
+      {% if session.get('username') %}
+        <a href="{{ url_for('leaderboard') }}" class="points-pill" title="View Leaderboard">
+          <i data-lucide="zap" style="width:16px;height:16px;"></i>
+          {{ session.get('eco_points', 0) }} pts &nbsp;·&nbsp; {{ session.get('badge', 'Newcomer') }}
+        </a>
+        <span style="color:#33e05d;font-weight:700;">Hi, {{ session['username'] }}</span>
+        <a href="{{ url_for('logout') }}" class="logout-btn">
+          <i data-lucide="log-out"></i> Logout
+        </a>
+      {% else %}
+        <a href="{{ url_for('login_signup') }}" class="login-btn">Login / Sign Up</a>
+      {% endif %}
+    </div>
+
+    <section class="page-shell">
+      <div class="page-head">
+        <h1>📊 My Analytics Dashboard</h1>
+        <p>A breakdown of all waste detections, your eco impact, and activity over time.</p>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+          <div class="stat-label">Total Scans</div>
+          <div class="stat-value green" id="statTotal">—</div>
+          <div class="stat-sub">all-time detections</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">CO₂ Saved</div>
+          <div class="stat-value teal" id="statCarbon">—</div>
+          <div class="stat-sub">kg CO₂ equivalent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Eco Points</div>
+          <div class="stat-value yellow" id="statPoints">{{ session.get('eco_points', 0) }}</div>
+          <div class="stat-sub" id="statBadge">{{ session.get('badge', 'Newcomer') }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Days</div>
+          <div class="stat-value blue" id="statDays">—</div>
+          <div class="stat-sub">last 30 days</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="chart-grid">
+
+        <!-- Pie chart -->
+        <div class="chart-panel">
+          <h3>Waste <span>Categories</span></h3>
+          <div class="chart-wrap pie-wrap">
+            <div class="loading-state" id="pieLoading">
+              <div class="spinner"></div>Loading data…
+            </div>
+            <canvas id="pieChart" style="display:none;"></canvas>
+            <div class="no-data" id="pieNoData" style="display:none;">No detections yet.</div>
+          </div>
+        </div>
+
+        <!-- Line chart -->
+        <div class="chart-panel">
+          <h3>Scans Over <span>Time</span> <small style="font-size:13px;color:rgba(240,248,255,0.45);font-weight:500;">(last 30 days)</small></h3>
+          <div class="chart-wrap" style="height:260px;">
+            <div class="loading-state" id="lineLoading">
+              <div class="spinner"></div>Loading data…
+            </div>
+            <canvas id="lineChart" style="display:none;height:260px;"></canvas>
+            <div class="no-data" id="lineNoData" style="display:none;">No activity in the last 30 days.</div>
+          </div>
+          <!-- Carbon impact callout -->
+          <div id="carbonCallout" style="margin-top:18px;display:none;">
+            <div class="carbon-badge">
+              <i data-lucide="leaf" style="width:18px;height:18px;"></i>
+              <span id="carbonText"></span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /chart-grid -->
+    </section>
+  </main>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  /* ── Theme toggle ── */
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const isLight = document.body.dataset.theme === 'light';
+    document.body.dataset.theme = isLight ? 'dark' : 'light';
+    document.body.style.background = isLight ? '' : 'linear-gradient(180deg,#eef4ff 0%,#dfeaf9 100%)';
+  });
+
+  /* ── Chart.js global defaults (dark theme) ── */
+  Chart.defaults.color = 'rgba(240,248,255,0.70)';
+  Chart.defaults.font.family = 'Inter, sans-serif';
+  Chart.defaults.font.size   = 13;
+
+  const PIE_COLORS  = ['#33e05d','#2f7fff','#f8c316','#ff5f5f','#2dd4bf','#a78bfa'];
+  const LINE_COLOR  = '#33e05d';
+
+  /* ── Fetch dashboard data and render ── */
+  async function loadDashboard() {
+    try {
+      const res  = await fetch('/api/dashboard-data');
+      const data = await res.json();
+
+      /* -- Stat cards -- */
+      document.getElementById('statTotal').textContent  = data.total_scans;
+      document.getElementById('statCarbon').textContent = data.carbon_impact + ' kg';
+      document.getElementById('statPoints').textContent = data.user_points;
+      document.getElementById('statBadge').textContent  = data.user_badge;
+
+      const activeDays = new Set(data.scans_by_date.map(d => d.date)).size;
+      document.getElementById('statDays').textContent = activeDays;
+
+      /* -- Carbon callout -- */
+      if (data.carbon_impact > 0) {
+        document.getElementById('carbonText').textContent =
+          `Estimated ${data.carbon_impact} kg CO₂ saved through correct waste detection`;
+        document.getElementById('carbonCallout').style.display = 'block';
+        lucide.createIcons(); // re-run for newly visible icons
+      }
+
+      /* -- Pie chart -- */
+      const pieEl = document.getElementById('pieChart');
+      document.getElementById('pieLoading').style.display = 'none';
+      const classLabels = Object.keys(data.counts_by_class);
+      if (classLabels.length === 0) {
+        document.getElementById('pieNoData').style.display = 'block';
+      } else {
+        pieEl.style.display = 'block';
+        new Chart(pieEl, {
+          type: 'doughnut',
+          data: {
+            labels: classLabels,
+            datasets: [{
+              data: Object.values(data.counts_by_class),
+              backgroundColor: PIE_COLORS.slice(0, classLabels.length),
+              borderColor: 'rgba(7,13,24,0.80)',
+              borderWidth: 3,
+              hoverOffset: 10,
+            }]
+          },
+          options: {
+            responsive: true,
+            cutout: '62%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { padding: 16, usePointStyle: true, pointStyleWidth: 12 }
+              },
+              tooltip: {
+                callbacks: {
+                  label: ctx => ` ${ctx.label}: ${ctx.parsed} scan${ctx.parsed !== 1 ? 's' : ''}`
+                }
+              }
+            }
+          }
+        });
+      }
+
+      /* -- Line chart -- */
+      const lineEl = document.getElementById('lineChart');
+      document.getElementById('lineLoading').style.display = 'none';
+      if (data.scans_by_date.length === 0) {
+        document.getElementById('lineNoData').style.display = 'block';
+      } else {
+        lineEl.style.display = 'block';
+        new Chart(lineEl, {
+          type: 'line',
+          data: {
+            labels: data.scans_by_date.map(d => d.date),
+            datasets: [{
+              label: 'Scans',
+              data: data.scans_by_date.map(d => d.count),
+              borderColor: LINE_COLOR,
+              backgroundColor: 'rgba(51,224,93,0.10)',
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointBackgroundColor: LINE_COLOR,
+              pointBorderColor: '#07101f',
+              pointBorderWidth: 2,
+              fill: true,
+              tension: 0.38,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: {
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { maxRotation: 40, maxTicksLimit: 10 }
+              },
+              y: {
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                beginAtZero: true,
+                ticks: { stepSize: 1 }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(7,13,24,0.92)',
+                borderColor: 'rgba(51,224,93,0.30)',
+                borderWidth: 1,
+                padding: 12,
+                callbacks: {
+                  label: ctx => ` ${ctx.parsed.y} scan${ctx.parsed.y !== 1 ? 's' : ''}`
+                }
+              }
+            }
+          }
+        });
+      }
+
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+      ['pieLoading','lineLoading'].forEach(id => {
+        document.getElementById(id).innerHTML = '<p style="color:#ff8080">Failed to load data.</p>';
+      });
+    }
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+venv/
+venv311/
+venv_clean/
+venv_fresh/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.idea/
+.vscode/
+*.db
+uploads/*
+!.gitkeep
+.env
